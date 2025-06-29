@@ -2,13 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BlockBreaker.com - Minecraft Block Breaker Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Courier New', monospace;
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect x="8" y="4" width="4" height="4" fill="%23FFD700"/><rect x="12" y="8" width="4" height="4" fill="%23FFD700"/><rect x="16" y="12" width="4" height="4" fill="%23FFD700"/><rect x="20" y="16" width="4" height="4" fill="%23A0522D"/><rect x="24" y="20" width="4" height="4" fill="%23A0522D"/><rect x="28" y="24" width="4" height="4" fill="%23A0522D"/></svg>') 16 16, auto;
+            /* Prevent text selection and zooming on mobile */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior: none;
+            /* Disable iOS bounce effect */
+            -webkit-overflow-scrolling: touch;
         }
         
         .game-active-cursor {
@@ -17,11 +28,51 @@
         
         .game-ui-compact {
             position: fixed;
-            top: 10px;
+            top: 5px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 100;
+            z-index: 1000;
             transition: all 0.5s ease-in-out;
+            width: auto;
+            max-width: 600px;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            backdrop-filter: none;
+            border: none;
+            box-shadow: none;
+            min-height: auto;
+        }
+        
+        /* Hide entire hero section content during gameplay */
+        .game-ui-compact .max-w-4xl {
+            display: none;
+        }
+        
+        /* Create a separate compact gameplay UI */
+        .compact-gameplay-ui {
+            display: none;
+            text-align: center;
+        }
+        
+        .game-ui-compact .compact-gameplay-ui {
+            display: block;
+        }
+        
+        /* Keep navigation visible during gameplay */
+        .nav-gameplay-mode {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+        
+        .game-ui-compact #gameControls button {
+            padding: 8px 16px;
+            font-size: 14px;
         }
         
         .game-ui-normal {
@@ -42,6 +93,16 @@
                 inset -2px -2px 0 rgba(0,0,0,0.3),
                 2px 2px 8px rgba(0,0,0,0.5);
             animation: float 4s ease-in-out infinite;
+            /* Touch-friendly styling */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            /* Improve touch target size on small screens */
+            min-width: 44px;
+            min-height: 44px;
         }
         
         .bubble:hover {
@@ -51,6 +112,16 @@
         
         .bubble:active {
             transform: scale(0.95);
+        }
+        
+        /* Touch feedback for mobile devices */
+        .bubble.touch-feedback {
+            transform: scale(0.9);
+            filter: brightness(1.3);
+            box-shadow: 
+                inset 2px 2px 0 rgba(255,255,255,0.5),
+                inset -2px -2px 0 rgba(0,0,0,0.5),
+                0 0 15px rgba(255, 215, 0, 0.8);
         }
         
         @keyframes float {
@@ -187,6 +258,181 @@
             transition: all 2s ease-in-out;
         }
 
+        /* Animation for compact UI entrance */
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        .game-ui-compact.animate-entrance {
+            animation: slideInFromTop 0.6s ease-out;
+        }
+        
+        /* Mobile optimizations for compact UI */
+        @media (max-width: 768px) {
+            .game-ui-compact {
+                width: 95%;
+                padding: 12px 15px;
+            }
+            
+            .game-ui-compact #counter {
+                font-size: 20px;
+            }
+            
+            .game-ui-compact #gameControls button {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            /* Improve bubble visibility on mobile */
+            .bubble {
+                min-width: 50px;
+                min-height: 50px;
+                border: 3px solid #333;
+            }
+            
+            /* Larger touch targets for gameplay controls */
+            .gameplay-controls button {
+                padding: 12px 16px !important;
+                font-size: 16px !important;
+                min-height: 48px;
+                min-width: 120px;
+            }
+            
+            /* Better spacing for mobile counter */
+            .gameplay-counter {
+                top: 70px;
+                padding: 12px 16px;
+            }
+            
+            /* Reduce navigation height on mobile during gameplay */
+            .nav-gameplay-mode {
+                padding: 8px 16px;
+            }
+            
+            /* Make main buttons more touch-friendly */
+            .minecraft-button {
+                min-height: 48px;
+                min-width: 120px;
+                padding: 12px 16px;
+                font-size: 16px;
+            }
+            
+            /* Responsive text sizes */
+            h1 {
+                font-size: 2.5rem !important;
+            }
+            
+            .text-xl {
+                font-size: 1.125rem;
+            }
+            
+            /* Better mobile layout for features grid */
+            #features {
+                grid-template-columns: 1fr;
+                gap: 4;
+                max-width: 100%;
+            }
+            
+            /* Mobile footer */
+            footer {
+                position: relative !important;
+                margin-top: 2rem;
+            }
+            
+            footer .flex {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            /* Mobile navigation styling */
+            nav {
+                padding: 1rem;
+            }
+            
+            #mobileMenu {
+                background: rgba(0, 0, 0, 0.8);
+                border-radius: 8px;
+                padding: 1rem;
+                border: 2px solid rgba(255, 215, 0, 0.3);
+            }
+        }
+        
+        /* Landscape orientation optimizations for mobile */
+        @media screen and (orientation: landscape) and (max-height: 600px) {
+            h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .text-xl {
+                font-size: 1rem;
+            }
+            
+            .gameplay-controls {
+                top: 2px;
+            }
+            
+            .gameplay-counter {
+                top: 45px;
+            }
+            
+            .bubble {
+                min-width: 40px;
+                min-height: 40px;
+            }
+        }
+        
+        /* Additional mobile device styling */
+        .mobile-device .bubble {
+            /* Larger tap targets for mobile */
+            min-width: 48px;
+            min-height: 48px;
+        }
+        
+        .mobile-device .minecraft-button {
+            /* Ensure all buttons meet touch target guidelines */
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .bubble {
+                min-width: 45px;
+                min-height: 45px;
+            }
+            
+            h1 {
+                font-size: 2rem !important;
+            }
+            
+            .gameplay-controls {
+                top: 5px;
+            }
+            
+            .gameplay-counter {
+                top: 60px;
+            }
+            
+            .nav-gameplay-mode {
+                padding: 6px 12px;
+            }
+            
+            .minecraft-button {
+                min-height: 44px;
+                min-width: 100px;
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+        }
+        
         /* Background themes for different levels */
         .bg-overworld {
             background: linear-gradient(45deg, #4a7c59 0%, #8fbc8f 25%, #6b8e23 50%, #556b2f 75%, #2e8b57 100%);
@@ -512,13 +758,46 @@
                 inset -2px -2px 0 rgba(0,0,0,0.2);
             background: rgba(139, 69, 19, 0.8);
         }
+        
+        /* Separate UI elements for gameplay */
+        .gameplay-controls {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .gameplay-counter {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+        
+        /* Show gameplay UI elements when game is active */
+        body.game-active .gameplay-controls {
+            display: flex;
+        }
+        
+        body.game-active .gameplay-counter {
+            display: block;
+        }
     </style>
 </head>
 <body class="minecraft-bg min-h-screen overflow-hidden relative">
     <!-- Header -->
     <nav class="relative z-50 px-6 py-4">
         <div class="flex justify-between items-center">
-            <div class="text-yellow-300 font-bold text-2xl" style="font-family: 'Courier New', monospace; text-shadow: 2px 2px 0 #333;">
+            <div class="text-yellow-300 font-bold text-xl md:text-2xl" style="font-family: 'Courier New', monospace; text-shadow: 2px 2px 0 #333;">
                 ⛏️ BLOCKBREAKER.COM
             </div>
             <div class="hidden md:flex space-x-6">
@@ -526,6 +805,18 @@
                 <a href="#features" class="text-yellow-300 hover:text-yellow-400 transition-colors font-bold" style="text-shadow: 1px 1px 0 #333;">FEATURES</a>
                 <a href="#about" class="text-yellow-300 hover:text-yellow-400 transition-colors font-bold" style="text-shadow: 1px 1px 0 #333;">ABOUT</a>
             </div>
+            <!-- Mobile menu button -->
+            <div class="md:hidden">
+                <button id="mobileMenuBtn" class="text-yellow-300 text-xl">
+                    ☰
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden mt-4 space-y-2">
+            <a href="#game" class="block text-yellow-300 hover:text-yellow-400 transition-colors font-bold py-2" style="text-shadow: 1px 1px 0 #333;">MINE</a>
+            <a href="#features" class="block text-yellow-300 hover:text-yellow-400 transition-colors font-bold py-2" style="text-shadow: 1px 1px 0 #333;">FEATURES</a>
+            <a href="#about" class="block text-yellow-300 hover:text-yellow-400 transition-colors font-bold py-2" style="text-shadow: 1px 1px 0 #333;">ABOUT</a>
         </div>
     </nav>
 
@@ -542,6 +833,13 @@
             <p class="text-xl md:text-2xl text-green-200 mb-8 max-w-2xl mx-auto" style="font-family: 'Courier New', monospace; text-shadow: 1px 1px 0 #333;">
                 The most satisfying block breaking experience! Mine blocks, collect resources, and become the ultimate miner!
             </p>
+            
+            <!-- Mobile touch instruction -->
+            <div id="touchHint" class="mb-6 md:hidden">
+                <p class="text-sm text-yellow-200 bg-black bg-opacity-50 px-4 py-2 rounded inline-block" style="font-family: 'Courier New', monospace;">
+                    📱 Tap blocks to mine them on touch devices!
+                </p>
+            </div>
 
             <!-- Counter Display -->
             <div id="gameUI" class="mb-8">
@@ -549,8 +847,13 @@
                     <span class="text-yellow-300 text-lg font-bold mr-3" style="text-shadow: 1px 1px 0 #333;">BLOCKS MINED:</span>
                     <span id="counter" class="text-3xl font-bold text-yellow-400 counter-glow">0</span>
                 </div>
-                <div id="levelDisplay" class="mt-2">
-                    <span class="text-green-300 text-sm font-bold" style="text-shadow: 1px 1px 0 #333;" id="currentLevel">LEVEL: PLAINS</span>
+                <div class="inline-flex items-center minecraft-panel rounded px-6 py-2 mt-3">
+                    <span class="text-green-300 text-sm font-bold mr-2" style="text-shadow: 1px 1px 0 #333;">BIOME:</span>
+                    <span id="biomeDisplay" class="text-lg font-bold text-green-400" style="text-shadow: 1px 1px 0 #333;">Overworld</span>
+                </div>
+                <div class="inline-flex items-center minecraft-panel rounded px-4 py-1 mt-2">
+                    <span class="text-blue-300 text-xs font-bold mr-2" style="text-shadow: 1px 1px 0 #333;">NEXT:</span>
+                    <span id="nextBiomeDisplay" class="text-sm font-bold text-blue-400" style="text-shadow: 1px 1px 0 #333;">Plains (50 blocks)</span>
                 </div>
             </div>
 
@@ -559,8 +862,14 @@
                 <button id="startGame" class="minecraft-button bg-green-600 hover:bg-green-500 text-white font-bold py-4 px-8 rounded">
                     ⛏️ START MINING!
                 </button>
+                <button id="stopGame" class="minecraft-button bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-4 px-8 rounded hidden">
+                    ⏹️ STOP MINING
+                </button>
                 <button id="resetGame" class="minecraft-button bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-8 rounded">
                     🔄 RESET MINE
+                </button>
+                <button id="musicToggle" class="minecraft-button bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 px-8 rounded">
+                    🎵 MUSIC: ON
                 </button>
             </div>
 
@@ -585,7 +894,49 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Compact Gameplay UI (shown only during gameplay) -->
+        <div class="compact-gameplay-ui">
+            <!-- This div will be empty since we're using separate positioned elements -->
+        </div>
     </div>
+
+    <!-- Separate Gameplay Controls (top center) -->
+    <div class="gameplay-controls">
+        <div class="flex justify-center gap-2">
+            <button id="compactStopGame" class="minecraft-button bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded text-sm">
+                ⏹️ STOP MINING
+            </button>
+            <button id="compactResetGame" class="minecraft-button bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded text-sm">
+                🔄 RESET MINE
+            </button>
+            <button id="compactMusicToggle" class="minecraft-button bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded text-sm">
+                🎵
+            </button>
+        </div>
+    </div>
+
+    <!-- Separate Counter Display (top right) -->
+    <div class="gameplay-counter">
+        <div class="text-center">
+            <div class="text-yellow-300 text-xs font-bold mb-1" style="text-shadow: 1px 1px 0 #333;">BLOCKS MINED</div>
+            <div id="compactCounter" class="text-xl font-bold text-yellow-400 counter-glow">0</div>
+            <div class="text-green-300 text-xs font-bold mt-1" style="text-shadow: 1px 1px 0 #333;">BIOME</div>
+            <div id="compactBiomeDisplay" class="text-sm font-bold text-green-400" style="text-shadow: 1px 1px 0 #333;">Overworld</div>
+        </div>
+    </div>
+
+    <!-- Background Music -->
+    <audio id="backgroundMusic" loop preload="auto" style="display: none;">
+        <source src="c:\Users\Aidan\Downloads\10 HOURS OF MINECRAFT MAIN THEME.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Block Break Sound Effect -->
+    <audio id="blockBreakSound" preload="auto" style="display: none;">
+        <source src="c:\Users\Aidan\Downloads\Untitled video - Made with Clipchamp (2).mp4" type="audio/mp4">
+        Your browser does not support the audio element.
+    </audio>
 
     <!-- Game Area (Hidden behind content) -->
     <div id="gameArea" class="absolute inset-0 pointer-events-none">
@@ -610,108 +961,117 @@
 
     <script>
         let blockCount = 0;
+        let currentLevel = 1;
+        let currentBiome = 'overworld';
         let gameActive = false;
         let blockInterval;
-        let currentBgLevel = 0;
         let activeBlocks = [];
-        let biomesUnlocked = 0; // Track how many biomes have been unlocked
         let miningDisabled = false; // Track if mining is temporarily disabled during confetti
-        let diamondCollected = false; // Track if diamond has been collected at least once
-        let netheriteCollected = false; // Track if netherite has been collected at least once
-        let guaranteedDiamondSpawned = false; // Track if guaranteed diamond at biome 1 has spawned
-        let guaranteedNetheriteSpawned = false; // Track if guaranteed netherite at biome 1 has spawned
-        let inBloodLevel = false; // Track if player is in the secret blood level
-        let bloodLevelTriggered = false; // Track if blood level has been triggered at 666 blocks
         const gameArea = document.getElementById('gameArea');
         const counter = document.getElementById('counter');
+        const compactCounter = document.getElementById('compactCounter');
         const startBtn = document.getElementById('startGame');
+        const stopBtn = document.getElementById('stopGame');
         const resetBtn = document.getElementById('resetGame');
-        const levelDisplay = document.getElementById('currentLevel');
+        const compactStopBtn = document.getElementById('compactStopGame');
+        const compactResetBtn = document.getElementById('compactResetGame');
+        const musicToggleBtn = document.getElementById('musicToggle');
+        const compactMusicToggleBtn = document.getElementById('compactMusicToggle');
         const body = document.body;
+        const nav = document.querySelector('nav');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const blockBreakSound = document.getElementById('blockBreakSound');
+        
+        // Music settings
+        let musicEnabled = true;
 
-        // Background themes for different levels
-        const backgroundThemes = [
-            // Plains Biomes
-            { name: 'PLAINS', class: 'bg-plains', description: 'A relatively flat area with trees and villages' },
-            { name: 'ICE PLAINS', class: 'bg-ice-plains', description: 'Snow and ice-covered tundra with few trees' },
-            { name: 'ICE SPIKES', class: 'bg-ice-spikes', description: 'Icy spikes and glaciers reaching into the sky' },
-            { name: 'SUNFLOWER PLAINS', class: 'bg-sunflower-plains', description: 'The only biome where sunflowers spawn' },
-            { name: 'SNOWY PLAINS', class: 'bg-snowy-plains', description: 'Snow-covered area with rabbits and polar bears' },
-            { name: 'MUSHROOM FIELD', class: 'bg-mushroom-field', description: 'Mycelium island with big mushrooms and mooshrooms' },
-            { name: 'SAVANNA', class: 'bg-savanna', description: 'Flat, dry area with acacia trees and tall grass' },
+        // Progression system - biomes unlock at different score milestones
+        const biomeProgression = [
+            // Overworld Biomes - Plains
+            { name: 'overworld', threshold: 0, className: 'bg-overworld', displayName: 'Overworld' },
+            { name: 'plains', threshold: 50, className: 'bg-plains', displayName: 'Plains' },
+            { name: 'sunflower-plains', threshold: 100, className: 'bg-sunflower-plains', displayName: 'Sunflower Plains' },
+            { name: 'snowy-plains', threshold: 175, className: 'bg-snowy-plains', displayName: 'Snowy Plains' },
+            { name: 'ice-plains', threshold: 275, className: 'bg-ice-plains', displayName: 'Ice Plains' },
+            { name: 'ice-spikes', threshold: 400, className: 'bg-ice-spikes', displayName: 'Ice Spike Plains' },
             
-            // Forest Biomes
-            { name: 'FOREST', class: 'bg-forest', description: 'Areas filled with oak and birch trees' },
-            { name: 'BIRCH FOREST', class: 'bg-birch-forest', description: 'Forest variant where only birch trees appear' },
-            { name: 'DARK FOREST', class: 'bg-dark-forest', description: 'Dense dark oak trees that block sunlight' },
-            { name: 'FLOWER FOREST', class: 'bg-flower-forest', description: 'Less trees but tons of colorful flowers' },
-            { name: 'OLD GROWTH BIRCH', class: 'bg-old-birch', description: 'Birch forest with much taller trees' },
-            { name: 'TAIGA', class: 'bg-taiga', description: 'Spruce forest with ferns and berry bushes' },
-            { name: 'OLD GROWTH SPRUCE', class: 'bg-old-spruce', description: 'Giant spruce trees covered in leaf blocks' },
-            { name: 'OLD GROWTH PINE', class: 'bg-old-pine', description: 'Taller spruce trees with mossy cobblestone' },
-            { name: 'SNOWY TAIGA', class: 'bg-snowy-taiga', description: 'Snow-covered taiga with igloos' },
-            { name: 'JUNGLE', class: 'bg-jungle', description: 'Dense jungle with vines, ocelots, and pandas' },
-            { name: 'BAMBOO JUNGLE', class: 'bg-bamboo-jungle', description: 'Jungle covered in bamboo thickets' },
-            { name: 'SPARSE JUNGLE', class: 'bg-sparse-jungle', description: 'Less dense jungle variation' },
-            { name: 'GROVE', class: 'bg-grove', description: 'Spruce forest at mountain bottom with snow' },
-            { name: 'CHERRY GROVE', class: 'bg-cherry-grove', description: 'Area with pink cherry trees and falling petals' },
-            { name: 'PALE GARDEN', class: 'bg-pale-garden', description: 'Dark area where the creaking wooden creature lurks' },
+            // Woodlands
+            { name: 'forest', threshold: 550, className: 'bg-forest', displayName: 'Forest' },
+            { name: 'birch-forest', threshold: 725, className: 'bg-birch-forest', displayName: 'Birch Forest' },
+            { name: 'old-birch', threshold: 925, className: 'bg-old-birch', displayName: 'Old Growth Birch Forest' },
+            { name: 'flower-forest', threshold: 1150, className: 'bg-flower-forest', displayName: 'Flower Forest' },
+            { name: 'dark-forest', threshold: 1400, className: 'bg-dark-forest', displayName: 'Dark Forest' },
+            { name: 'taiga', threshold: 1675, className: 'bg-taiga', displayName: 'Taiga' },
+            { name: 'snowy-taiga', threshold: 1975, className: 'bg-snowy-taiga', displayName: 'Snowy Taiga' },
+            { name: 'old-spruce', threshold: 2300, className: 'bg-old-spruce', displayName: 'Old Growth Spruce Taiga' },
+            { name: 'old-pine', threshold: 2650, className: 'bg-old-pine', displayName: 'Old Growth Pine Taiga' },
+            { name: 'jungle', threshold: 3025, className: 'bg-jungle', displayName: 'Jungle' },
+            { name: 'bamboo-jungle', threshold: 3425, className: 'bg-bamboo-jungle', displayName: 'Bamboo Jungle' },
+            { name: 'sparse-jungle', threshold: 3850, className: 'bg-sparse-jungle', displayName: 'Sparse Jungle' },
+            { name: 'grove', threshold: 4300, className: 'bg-grove', displayName: 'Grove' },
+            { name: 'cherry-grove', threshold: 4775, className: 'bg-cherry-grove', displayName: 'Cherry Grove' },
+            { name: 'pale-garden', threshold: 5275, className: 'bg-pale-garden', displayName: 'Pale Garden' },
+            
+            // Mountains
+            { name: 'windswept-hills', threshold: 5800, className: 'bg-windswept-hills', displayName: 'Windswept Hills' },
+            { name: 'windswept-forest', threshold: 6350, className: 'bg-windswept-forest', displayName: 'Windswept Forest' },
+            { name: 'windswept-gravelly', threshold: 6925, className: 'bg-windswept-gravelly', displayName: 'Windswept Gravelly Hills' },
+            { name: 'meadow', threshold: 7525, className: 'bg-meadow', displayName: 'Meadow' },
+            { name: 'snowy-slopes', threshold: 8150, className: 'bg-snowy-slopes', displayName: 'Snowy Slopes' },
+            { name: 'jagged-peaks', threshold: 8800, className: 'bg-jagged-peaks', displayName: 'Jagged Peaks' },
+            { name: 'frozen-peaks', threshold: 9475, className: 'bg-frozen-peaks', displayName: 'Frozen Peaks' },
+            { name: 'stony-peaks', threshold: 10175, className: 'bg-stony-peaks', displayName: 'Stony Peaks' },
+            { name: 'stony-shores', threshold: 10900, className: 'bg-stony-shores', displayName: 'Stony Shores' },
+            
+            // Sandy/Desert Areas
+            { name: 'desert', threshold: 11650, className: 'bg-desert', displayName: 'Desert' },
+            { name: 'badlands', threshold: 12425, className: 'bg-badlands', displayName: 'Badlands' },
+            { name: 'wooded-badlands', threshold: 13225, className: 'bg-wooded-badlands', displayName: 'Wooded Badlands' },
+            { name: 'eroded-badlands', threshold: 14050, className: 'bg-eroded-badlands', displayName: 'Eroded Badlands' },
+            { name: 'beach', threshold: 14900, className: 'bg-beach', displayName: 'Beach' },
+            { name: 'snowy-beach', threshold: 15775, className: 'bg-snowy-beach', displayName: 'Snowy Beach' },
+            
+            // Special Overworld
+            { name: 'savanna', threshold: 16675, className: 'bg-savanna', displayName: 'Savanna' },
+            { name: 'savanna-plateau', threshold: 17600, className: 'bg-savanna-plateau', displayName: 'Savanna Plateau' },
+            { name: 'windswept-savanna', threshold: 18550, className: 'bg-windswept-savanna', displayName: 'Windswept Savanna' },
+            { name: 'swamp', threshold: 19525, className: 'bg-swamp', displayName: 'Swamp' },
+            { name: 'mangrove-swamp', threshold: 20525, className: 'bg-mangrove-swamp', displayName: 'Mangrove Swamp' },
+            { name: 'mushroom-field', threshold: 21550, className: 'bg-mushroom-field', displayName: 'Mushroom Fields' },
+            
+            // Water Areas
+            { name: 'river', threshold: 22600, className: 'bg-river', displayName: 'River' },
+            { name: 'frozen-river', threshold: 23675, className: 'bg-frozen-river', displayName: 'Frozen River' },
+            { name: 'ocean', threshold: 24775, className: 'bg-ocean', displayName: 'Ocean' },
+            { name: 'cold-ocean', threshold: 25900, className: 'bg-cold-ocean', displayName: 'Cold Ocean' },
+            { name: 'lukewarm-ocean', threshold: 27050, className: 'bg-lukewarm-ocean', displayName: 'Lukewarm Ocean' },
+            { name: 'warm-ocean', threshold: 28225, className: 'bg-warm-ocean', displayName: 'Warm Ocean' },
+            { name: 'deep-ocean', threshold: 29425, className: 'bg-deep-ocean', displayName: 'Deep Ocean' },
+            { name: 'frozen-ocean', threshold: 30650, className: 'bg-frozen-ocean', displayName: 'Frozen Ocean' },
             
             // Cave Biomes
-            { name: 'CAVES', class: 'bg-cave', description: 'Deep underground cave mining' },
-            { name: 'DEEP DARK', class: 'bg-deep-dark', description: 'Dark sculk caves where the warden resides' },
-            { name: 'DRIPSTONE CAVES', class: 'bg-dripstone-caves', description: 'Caves with stalactites and stalagmites' },
-            { name: 'LUSH CAVES', class: 'bg-lush-caves', description: 'Moss-filled caves with glow berries and axolotls' },
-            
-            // Mountain Biomes
-            { name: 'JAGGED PEAKS', class: 'bg-jagged-peaks', description: 'Tallest mountain peaks beyond the clouds' },
-            { name: 'FROZEN PEAKS', class: 'bg-frozen-peaks', description: 'Icy mountain peaks with packed ice' },
-            { name: 'STONY PEAKS', class: 'bg-stony-peaks', description: 'Warm mountain peaks without snow' },
-            { name: 'SNOWY SLOPES', class: 'bg-snowy-slopes', description: 'Snow-covered mountain areas with goats' },
-            { name: 'WINDSWEPT HILLS', class: 'bg-windswept-hills', description: 'Steep cliffs, valleys, and floating islands' },
-            { name: 'WINDSWEPT FOREST', class: 'bg-windswept-forest', description: 'Grassy windswept hills with trees' },
-            { name: 'WINDSWEPT GRAVELLY', class: 'bg-windswept-gravelly', description: 'Hills filled with gravel blocks' },
-            { name: 'MEADOW', class: 'bg-meadow', description: 'Grassy mountain area with flowers and bee nests' },
-            { name: 'STONY SHORES', class: 'bg-stony-shores', description: 'Rocky coastline with buried treasure' },
-            { name: 'SAVANNA PLATEAU', class: 'bg-savanna-plateau', description: 'High altitude savanna in mountains' },
-            { name: 'WINDSWEPT SAVANNA', class: 'bg-windswept-savanna', description: 'Mountainous savanna with steep cliffs' },
-            
-            // Swamp Biomes
-            { name: 'SWAMP', class: 'bg-swamp', description: 'Dark waters with hanging vines and swamp huts' },
-            { name: 'MANGROVE SWAMP', class: 'bg-mangrove-swamp', description: 'Vegetation-rich swamp with mangrove trees' },
-            
-            // Sandy/Desert Biomes
-            { name: 'BADLANDS', class: 'bg-badlands', description: 'Red sand desert with terracotta formations' },
-            { name: 'WOODED BADLANDS', class: 'bg-wooded-badlands', description: 'Badlands with coarse dirt and oak trees' },
-            { name: 'ERODED BADLANDS', class: 'bg-eroded-badlands', description: 'Badlands with towering terracotta spires' },
-            { name: 'BEACH', class: 'bg-beach', description: 'Sandy shores where turtles nest' },
-            { name: 'SNOWY BEACH', class: 'bg-snowy-beach', description: 'Snow-covered beach next to frozen ocean' },
-            { name: 'DESERT', class: 'bg-desert', description: 'Vast sand areas with cacti and pyramids' },
-            
-            // Water Biomes
-            { name: 'RIVER', class: 'bg-river', description: 'Flowing water with salmon and squid' },
-            { name: 'FROZEN RIVER', class: 'bg-frozen-river', description: 'Ice-covered river with polar bears' },
-            { name: 'OCEAN', class: 'bg-ocean', description: 'Basic ocean with seagrass and kelp' },
-            { name: 'COLD OCEAN', class: 'bg-cold-ocean', description: 'Deep-blue ocean with kelp forests' },
-            { name: 'DEEP OCEAN', class: 'bg-deep-ocean', description: 'Deep waters with underwater ravines' },
-            { name: 'FROZEN OCEAN', class: 'bg-frozen-ocean', description: 'Icy ocean with glaciers and polar bears' },
-            { name: 'LUKEWARM OCEAN', class: 'bg-lukewarm-ocean', description: 'Temperate ocean with abundant seagrass' },
-            { name: 'WARM OCEAN', class: 'bg-warm-ocean', description: 'Vibrant coral reef waters with tropical fish' },
+            { name: 'cave', threshold: 31900, className: 'bg-cave', displayName: 'Caves' },
+            { name: 'dripstone-caves', threshold: 33175, className: 'bg-dripstone-caves', displayName: 'Dripstone Caves' },
+            { name: 'lush-caves', threshold: 34475, className: 'bg-lush-caves', displayName: 'Lush Caves' },
+            { name: 'deep-dark', threshold: 35800, className: 'bg-deep-dark', displayName: 'Deep Dark' },
             
             // Nether Biomes
-            { name: 'NETHER WASTES', class: 'bg-nether-wastes', description: 'The fiery netherrack landscape' },
-            { name: 'SOUL SAND VALLEY', class: 'bg-soul-sand-valley', description: 'Slow-moving soul sand terrain' },
-            { name: 'BASALT DELTAS', class: 'bg-basalt-deltas', description: 'Gray volcanic basalt formations' },
-            { name: 'CRIMSON FOREST', class: 'bg-crimson-forest', description: 'Red fungus forest with piglins' },
-            { name: 'WARPED FOREST', class: 'bg-warped-forest', description: 'Blue fungus forest with endermen' },
+            { name: 'nether-wastes', threshold: 37150, className: 'bg-nether-wastes', displayName: 'Nether Wastes' },
+            { name: 'soul-sand-valley', threshold: 38525, className: 'bg-soul-sand-valley', displayName: 'Soul Sand Valley' },
+            { name: 'basalt-deltas', threshold: 39925, className: 'bg-basalt-deltas', displayName: 'Basalt Deltas' },
+            { name: 'crimson-forest', threshold: 41350, className: 'bg-crimson-forest', displayName: 'Crimson Forest' },
+            { name: 'warped-forest', threshold: 42800, className: 'bg-warped-forest', displayName: 'Warped Forest' },
             
             // End Biomes
-            { name: 'THE END', class: 'bg-end', description: 'Central island where the ender dragon awaits' },
-            { name: 'END BARRENS', class: 'bg-end-barrens', description: 'Barren outer edges of the End' },
-            { name: 'END HIGHLANDS', class: 'bg-end-highlands', description: 'High elevation End with end cities' },
-            { name: 'END MIDLANDS', class: 'bg-end-midlands', description: 'Mid-level End terrain with cities' },
-            { name: 'SMALL END ISLANDS', class: 'bg-small-end-islands', description: 'Floating islands for traversing the End' },
-            { name: 'THE REAL END', class: 'bg-real-end', description: 'The true final dimension where only the strongest netherite remains' }
+            { name: 'end', threshold: 44275, className: 'bg-end', displayName: 'The End' },
+            { name: 'end-barrens', threshold: 45775, className: 'bg-end-barrens', displayName: 'End Barrens' },
+            { name: 'end-midlands', threshold: 47300, className: 'bg-end-midlands', displayName: 'End Midlands' },
+            { name: 'end-highlands', threshold: 48850, className: 'bg-end-highlands', displayName: 'End Highlands' },
+            { name: 'small-end-islands', threshold: 50425, className: 'bg-small-end-islands', displayName: 'Small End Islands' },
+            
+            // Secret Final Biomes
+            { name: 'real-end', threshold: 52025, className: 'bg-real-end', displayName: 'The True End' },
+            { name: 'blood-level', threshold: 55000, className: 'bg-blood-level', displayName: 'Blood Dimension' }
         ];
 
         // Minecraft block types and colors
@@ -725,459 +1085,93 @@
             { name: 'emerald', color: '#50C878', rarity: 'very-rare' },
             { name: 'netherite', color: '#000000', rarity: 'legendary' },
             { name: 'obsidian', color: '#36013F', rarity: 'uncommon' },
-            { name: 'blood', color: '#8B0000', rarity: 'blood' } // Secret blood block worth 1000 points
+            // Ultra-rare special blocks - 0.01% chance each, worth 50 points
+            { name: 'ender-dragon-egg', color: '#1A1A2E', rarity: 'ultra-rare' },
+            { name: 'enchanted-golden-apple', color: '#FFDD44', rarity: 'ultra-rare' },
+            { name: 'music-disc-pigstep', color: '#8B4513', rarity: 'ultra-rare' },
+            { name: 'netherite-hoe', color: '#2D2D2D', rarity: 'ultra-rare' },
+            { name: 'skeleton-horse', color: '#F5F5DC', rarity: 'ultra-rare' },
+            // Bomb blocks - 0.20% chance, decrease points by 10
+            { name: 'bomb', color: '#8B4513', rarity: 'bomb' }
         ];
-
-        function updateBackground() {
-            // Don't allow progression when in blood level - player is trapped
-            if (inBloodLevel) {
-                return;
-            }
-            
-            // Calculate required blocks for each level using progressive scaling
-            // Each level requires more blocks than the previous one
-            // Level 0: 0-49 blocks (50 blocks)
-            // Level 1: 50-124 blocks (75 blocks) 
-            // Level 2: 125-224 blocks (100 blocks)
-            // And so on with increments of +25 blocks per level
-            //
-            // CALCULATION TO REACH THE FINAL LEVEL (THE REAL END - Level 60):
-            // Using arithmetic sequence: Level n requires (50 + 25*n) blocks
-            // Total blocks = Sum of blocks for levels 0 through 60
-            // Sum = 61 * (first_term + last_term) / 2
-            // first_term = 50, last_term = 50 + 25*60 = 1550
-            // Total = 61 * (50 + 1550) / 2 = 61 * 1600 / 2 = 48,800 blocks total
-            
-            let newLevel = 0;
-            let blocksNeeded = 50; // Start with 50 blocks for first level
-            let totalBlocks = 0;
-            let increment = 25; // Increase requirement by 25 blocks each level
-            
-            // Calculate which level the player should be at
-            while (newLevel < backgroundThemes.length - 1) {
-                if (blockCount < totalBlocks + blocksNeeded) {
-                    break;
-                }
-                totalBlocks += blocksNeeded;
-                blocksNeeded += increment; // Increase requirement for next level
-                newLevel++;
-            }
-            
-            if (newLevel !== currentBgLevel && newLevel < backgroundThemes.length) {
-                // Player has unlocked a new biome!
-                if (newLevel > currentBgLevel) {
-                    biomesUnlocked++;
-                }
-                
-                currentBgLevel = newLevel;
-                const theme = backgroundThemes[currentBgLevel];
-                
-                // Remove all background classes
-                const allBgClasses = [
-                    'bg-overworld', 'bg-plains', 'bg-ice-plains', 'bg-ice-spikes', 'bg-sunflower-plains', 
-                    'bg-snowy-plains', 'bg-mushroom-field', 'bg-savanna', 'bg-forest', 'bg-birch-forest',
-                    'bg-dark-forest', 'bg-flower-forest', 'bg-old-birch', 'bg-taiga', 'bg-old-spruce',
-                    'bg-old-pine', 'bg-snowy-taiga', 'bg-jungle', 'bg-bamboo-jungle', 'bg-sparse-jungle',
-                    'bg-grove', 'bg-cherry-grove', 'bg-pale-garden', 'bg-cave', 'bg-deep-dark',
-                    'bg-dripstone-caves', 'bg-lush-caves', 'bg-jagged-peaks', 'bg-frozen-peaks',
-                    'bg-stony-peaks', 'bg-snowy-slopes', 'bg-windswept-hills', 'bg-windswept-forest',
-                    'bg-windswept-gravelly', 'bg-meadow', 'bg-stony-shores', 'bg-savanna-plateau',
-                    'bg-windswept-savanna', 'bg-swamp', 'bg-mangrove-swamp', 'bg-badlands',
-                    'bg-wooded-badlands', 'bg-eroded-badlands', 'bg-beach', 'bg-snowy-beach',
-                    'bg-desert', 'bg-river', 'bg-frozen-river', 'bg-ocean', 'bg-cold-ocean',
-                    'bg-deep-ocean', 'bg-frozen-ocean', 'bg-lukewarm-ocean', 'bg-warm-ocean',
-                    'bg-nether-wastes', 'bg-soul-sand-valley', 'bg-basalt-deltas', 'bg-crimson-forest',
-                    'bg-warped-forest', 'bg-nether', 'bg-mesa', 'bg-end', 'bg-end-barrens',
-                    'bg-end-highlands', 'bg-end-midlands', 'bg-small-end-islands', 'bg-real-end'
-                ];
-                
-                body.classList.remove(...allBgClasses);
-                
-                // Add new background class
-                body.classList.add(theme.class);
-                
-                // Update level display
-                levelDisplay.textContent = `LEVEL: ${theme.name}`;
-                levelDisplay.title = theme.description;
-                
-                // Show level change notification
-                showLevelUp(theme.name, theme.description);
-            }
-        }
-
-        function showLevelUp(levelName, description) {
-            // Create level up notification
-            const notification = document.createElement('div');
-            notification.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(0, 0, 0, 0.9);
-                    color: #FFD700;
-                    padding: 20px;
-                    border: 3px solid #333;
-                    border-radius: 10px;
-                    text-align: center;
-                    z-index: 10000;
-                    font-family: 'Courier New', monospace;
-                    font-weight: bold;
-                    font-size: 18px;
-                    text-shadow: 2px 2px 0 #333;
-                    animation: pulse 0.5s ease-in-out 3;
-                ">
-                    <div style="font-size: 24px; margin-bottom: 10px;">🎉 LEVEL UP! 🎉</div>
-                    <div style="color: #00FF00; margin-bottom: 5px;">ENTERING: ${levelName}</div>
-                    <div style="font-size: 14px; color: #CCCCCC;">${description}</div>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Add pulse animation
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes pulse {
-                    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-                    50% { transform: translate(-50%, -50%) scale(1.1); }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // Remove notification after 3 seconds
-            setTimeout(() => {
-                notification.remove();
-                style.remove();
-            }, 3000);
-        }
-
-        function triggerBloodLevel() {
-            bloodLevelTriggered = true;
-            inBloodLevel = true;
-            
-            // Remove all background classes and add blood level
-            const allBgClasses = [
-                'bg-overworld', 'bg-plains', 'bg-ice-plains', 'bg-ice-spikes', 'bg-sunflower-plains', 
-                'bg-snowy-plains', 'bg-mushroom-field', 'bg-savanna', 'bg-forest', 'bg-birch-forest',
-                'bg-dark-forest', 'bg-flower-forest', 'bg-old-birch', 'bg-taiga', 'bg-old-spruce',
-                'bg-old-pine', 'bg-snowy-taiga', 'bg-jungle', 'bg-bamboo-jungle', 'bg-sparse-jungle',
-                'bg-grove', 'bg-cherry-grove', 'bg-pale-garden', 'bg-cave', 'bg-deep-dark',
-                'bg-dripstone-caves', 'bg-lush-caves', 'bg-jagged-peaks', 'bg-frozen-peaks',
-                'bg-stony-peaks', 'bg-snowy-slopes', 'bg-windswept-hills', 'bg-windswept-forest',
-                'bg-windswept-gravelly', 'bg-meadow', 'bg-stony-shores', 'bg-savanna-plateau',
-                'bg-windswept-savanna', 'bg-swamp', 'bg-mangrove-swamp', 'bg-badlands',
-                'bg-wooded-badlands', 'bg-eroded-badlands', 'bg-beach', 'bg-snowy-beach',
-                'bg-desert', 'bg-river', 'bg-frozen-river', 'bg-ocean', 'bg-cold-ocean',
-                'bg-deep-ocean', 'bg-frozen-ocean', 'bg-lukewarm-ocean', 'bg-warm-ocean',
-                'bg-nether-wastes', 'bg-soul-sand-valley', 'bg-basalt-deltas', 'bg-crimson-forest',
-                'bg-warped-forest', 'bg-nether', 'bg-mesa', 'bg-end', 'bg-end-barrens',
-                'bg-end-highlands', 'bg-end-midlands', 'bg-small-end-islands', 'bg-real-end'
-            ];
-            
-            body.classList.remove(...allBgClasses);
-            body.classList.add('bg-blood-level');
-            
-            // Update level display
-            levelDisplay.textContent = 'LEVEL: 💀 SECRET BLOOD REALM 💀';
-            levelDisplay.title = 'You have found the forbidden realm where blood blocks worth 1000 points await...';
-            
-            // Show blood level notification
-            showBloodLevelNotification();
-            
-            // Start countdown to crash the website after 60 seconds
-            setTimeout(() => {
-                crashWebsite();
-            }, 60000);
-        }
-
-        function showBloodLevelNotification() {
-            // Create blood level notification
-            const notification = document.createElement('div');
-            notification.innerHTML = `
-                <div style="
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(139, 0, 0, 0.95);
-                    color: #FF0000;
-                    padding: 30px;
-                    border: 5px solid #8B0000;
-                    border-radius: 15px;
-                    text-align: center;
-                    z-index: 10000;
-                    font-family: 'Courier New', monospace;
-                    font-weight: bold;
-                    font-size: 20px;
-                    text-shadow: 3px 3px 0 #000;
-                    box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
-                ">
-                    <div style="font-size: 32px; margin-bottom: 15px;">💀🩸 SECRET DISCOVERED! 🩸💀</div>
-                    <div style="color: #FFFFFF; margin-bottom: 10px; font-size: 24px;">BLOOD REALM UNLOCKED</div>
-                    <div style="font-size: 16px; color: #FFCCCC; margin-bottom: 10px;">At exactly 666 blocks...</div>
-                    <div style="font-size: 18px; color: #FF6666;">Blood blocks are worth 1000 points each!</div>
-                    <div style="font-size: 14px; color: #FFAAAA; margin-top: 10px;">Counter corrupted - shows ERROR 666</div>
-                    <div style="font-size: 12px; color: #FF9999; margin-top: 15px;">
-                        ⚠️ WARNING: System corruption in 60 seconds ⚠️
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Remove notification after 6 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 6000);
-        }
-
-        function crashWebsite() {
-            // Stop all game activity
-            gameActive = false;
-            clearInterval(blockInterval);
-            miningDisabled = true;
-            
-            // Create crash overlay
-            const crashOverlay = document.createElement('div');
-            crashOverlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: linear-gradient(45deg, #000000 0%, #8B0000 50%, #000000 100%);
-                z-index: 99999;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                color: #FF0000;
-                font-family: 'Courier New', monospace;
-                font-weight: bold;
-                text-align: center;
-            `;
-            
-            crashOverlay.innerHTML = `
-                <div style="font-size: 48px; margin-bottom: 20px; text-shadow: 3px 3px 0 #000;">
-                    💀 SYSTEM CORRUPTED 💀
-                </div>
-                <div style="font-size: 24px; margin-bottom: 30px; color: #FFFFFF;">
-                    THE BLOOD REALM HAS CONSUMED YOUR BROWSER
-                </div>
-                <div style="font-size: 18px; margin-bottom: 20px; color: #FF6666;">
-                    ERROR 666: FORBIDDEN KNOWLEDGE ACCESSED
-                </div>
-                <div style="font-size: 14px; color: #FFAAAA;">
-                    Refresh to escape... if you can...
-                </div>
-                <div style="font-size: 12px; color: #FF9999; margin-top: 30px;">
-                    The blood blocks have claimed another victim...
-                </div>
-            `;
-            
-            document.body.appendChild(crashOverlay);
-            
-            // Disable all interactions
-            document.body.style.pointerEvents = 'none';
-            crashOverlay.style.pointerEvents = 'all';
-            
-            // Show console error messages for extra effect
-            console.error('💀 BLOOD REALM BREACH DETECTED 💀');
-            console.error('ERROR 666: Forbidden dimensional access');
-            console.error('System integrity compromised...');
-            console.error('The blood blocks have awakened...');
-            
-            // Attempt to simulate more dramatic effects
-            setTimeout(() => {
-                try {
-                    // Try to fill up memory (safely contained)
-                    let memoryEater = [];
-                    for (let i = 0; i < 100; i++) {
-                        memoryEater.push(new Array(10000).fill('BLOOD'));
-                    }
-                } catch (e) {
-                    console.error('Memory consumption failed: ' + e.message);
-                }
-                
-                // Spam alerts (user can close them)
-                setTimeout(() => alert('💀 THE BLOOD REALM CLAIMS ANOTHER SOUL 💀'), 100);
-                setTimeout(() => alert('You should not have mined 666 blocks...'), 1000);
-                setTimeout(() => alert('The website is now cursed forever...'), 2000);
-            }, 2000);
-        }
-
-        function createRedConfetti() {
-            // Disable mining during the confetti effect
-            miningDisabled = true;
-            
-            const rainbowColors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF69B4', '#00FFFF', '#FFA500', '#32CD32', '#FF1493', '#8A2BE2', '#DC143C', '#00CED1'];
-            
-            // Blood confetti settings - same as netherite blocks
-            const confettiCount = 500; // Same as netherite
-            const animationDuration = 4000; // Same as netherite (4 seconds)
-            const totalEffectDuration = 6000; // Same as netherite (6 seconds total)
-            const burstCount = 3; // Same as netherite
-            
-            for (let burst = 0; burst < burstCount; burst++) {
-                setTimeout(() => {
-                    // Random position for each firework burst - spread across entire screen
-                    const burstX = Math.random() * (window.innerWidth * 0.9) + (window.innerWidth * 0.05);
-                    const burstY = Math.random() * (window.innerHeight * 0.7) + (window.innerHeight * 0.15);
-                    
-                    // Create particles for this burst
-                    const particlesPerBurst = Math.floor(confettiCount / burstCount);
-                    const batchFragment = document.createDocumentFragment();
-                    
-                    for (let i = 0; i < particlesPerBurst; i++) {
-                        // Create blood confetti particle
-                        const confetti = document.createElement('div');
-                        confetti.className = 'blood-confetti';
-                        
-                        // Random rainbow color
-                        const randomColor = rainbowColors[Math.floor(Math.random() * rainbowColors.length)];
-                        confetti.style.background = randomColor;
-                        confetti.style.boxShadow = `0 0 10px ${randomColor}`;
-                        
-                        // Blood drop and square shapes
-                        if (Math.random() < 0.3) {
-                            // Blood drop shape
-                            confetti.style.borderRadius = '50% 50% 50% 0';
-                            confetti.style.transform = 'rotate(-45deg)';
-                        } else {
-                            // Square shape
-                            confetti.style.borderRadius = '0';
-                        }
-                        
-                        // Variable sizes
-                        const size = Math.random() * 8 + 6; // 6-14px
-                        confetti.style.width = size + 'px';
-                        confetti.style.height = size + 'px';
-                        confetti.style.position = 'absolute';
-                        confetti.style.zIndex = '9999';
-                        
-                        // Start at burst center
-                        confetti.style.left = burstX + 'px';
-                        confetti.style.top = burstY + 'px';
-                        
-                        // Calculate explosion pattern
-                        const angle = Math.random() * Math.PI * 2;
-                        const distance = Math.random() * 350 + 150; // 150-500px spread
-                        const xDistance = Math.cos(angle) * distance;
-                        const yDistance = Math.sin(angle) * distance + (Math.random() * 100 + 50); // Gravity effect
-                        
-                        // Blood confetti animation
-                        confetti.style.animation = `bloodConfettiFall ${animationDuration}ms ease-out forwards`;
-                        confetti.style.setProperty('--x-distance', xDistance + 'px');
-                        confetti.style.setProperty('--y-distance', yDistance + 'px');
-                        confetti.style.animationDelay = (Math.random() * 0.2) + 's';
-                        
-                        batchFragment.appendChild(confetti);
-                    }
-                    
-                    // Add all particles at once
-                    gameArea.appendChild(batchFragment);
-                    
-                    // Cleanup
-                    setTimeout(() => {
-                        const bloodConfettiElements = gameArea.querySelectorAll('.blood-confetti');
-                        bloodConfettiElements.forEach(element => {
-                            if (element.parentNode) element.remove();
-                        });
-                    }, animationDuration + 1000);
-                    
-                }, burst * 300); // Same stagger timing as netherite
-            }
-            
-            // Add blood confetti animation CSS
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes bloodConfettiFall {
-                    0% { 
-                        transform: translate(0, 0) rotate(0deg);
-                        opacity: 1;
-                    }
-                    100% { 
-                        transform: translate(var(--x-distance), var(--y-distance)) rotate(720deg);
-                        opacity: 0;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-            
-            // Re-enable mining after effect
-            setTimeout(() => {
-                miningDisabled = false;
-                style.remove();
-            }, totalEffectDuration);
-        }
 
         function getRandomBlock() {
             const rand = Math.random();
             
-            // Special case: In blood level, only blood blocks can spawn
-            if (inBloodLevel) {
-                return blockTypes.filter(b => b.name === 'blood')[0];
+            // Progressive probability system based on current level/biome
+            // Get progression multiplier (1.0 to 3.0 based on level)
+            const progressionMultiplier = Math.min(1.0 + (currentLevel - 1) * 0.1, 3.0);
+            
+            // Base rates that scale with progression
+            let ultraRareRate = 0.0005 * progressionMultiplier;
+            let bombRate = Math.max(0.002 - (currentLevel - 1) * 0.0001, 0.0005); // Bombs become rarer as you progress
+            let baseCommon = Math.max(0.6 - (currentLevel - 1) * 0.02, 0.3); // Commons become rarer
+            let baseUncommon = 0.25 + (currentLevel - 1) * 0.005;
+            let baseRare = 0.10 + (currentLevel - 1) * 0.01;
+            let baseEmerald = 0.015 + (currentLevel - 1) * 0.002;
+            let baseDiamond = 0.0075 + (currentLevel - 1) * 0.002;
+            let baseNetherite = 0.005 + (currentLevel - 1) * 0.001;
+            
+            // Special biome modifiers
+            if (currentBiome.includes('nether')) {
+                // Nether biomes: more rare blocks, fewer commons
+                baseCommon *= 0.7;
+                baseRare *= 1.5;
+                baseDiamond *= 1.3;
+                baseNetherite *= 2.0;
+            } else if (currentBiome.includes('end')) {
+                // End biomes: extremely rare blocks more common
+                ultraRareRate *= 3.0;
+                baseNetherite *= 1.8;
+                baseDiamond *= 1.5;
+                baseCommon *= 0.5;
+            } else if (currentBiome === 'deep-dark') {
+                // Deep Dark: balanced rare block rates
+                baseRare *= 1.3;
+                baseDiamond *= 1.4;
+                baseNetherite *= 1.2;
+            } else if (currentBiome === 'blood-level') {
+                // Blood Level: maximum rarity
+                ultraRareRate *= 5.0;
+                baseNetherite *= 3.0;
+                baseDiamond *= 2.0;
+                baseCommon *= 0.3;
+                bombRate *= 0.1; // Almost no bombs in blood level
             }
             
-            // Special case: In "THE REAL END" biome (level 61, index 60), only netherite blocks can spawn
-            if (currentBgLevel === 60) {
-                return blockTypes.filter(b => b.name === 'netherite')[0];
+            // Normalize probabilities
+            const total = baseCommon + baseUncommon + baseRare + baseEmerald + baseDiamond + baseNetherite + ultraRareRate + bombRate;
+            if (total > 1.0) {
+                const scale = 0.98 / total;
+                baseCommon *= scale;
+                baseUncommon *= scale;
+                baseRare *= scale;
+                baseEmerald *= scale;
+                baseDiamond *= scale;
+                baseNetherite *= scale;
+                ultraRareRate *= scale;
+                bombRate *= scale;
             }
-            
-            // Guarantee diamond block spawn at biome level 1 (ICE PLAINS)
-            if (currentBgLevel === 1 && !guaranteedDiamondSpawned) {
-                guaranteedDiamondSpawned = true;
-                return blockTypes.filter(b => b.name === 'diamond')[0];
-            }
-            
-            // Guarantee netherite block spawn at biome level 1 (ICE PLAINS) after diamond
-            if (currentBgLevel === 1 && guaranteedDiamondSpawned && !guaranteedNetheriteSpawned) {
-                guaranteedNetheriteSpawned = true;
-                return blockTypes.filter(b => b.name === 'netherite')[0];
-            }
-            
-            // Check if diamond and netherite are available based on collection status and biome progression
-            // If not collected yet, they spawn normally
-            // Diamond: If collected, they only spawn when biomesUnlocked is a multiple of 3 (every 3 biomes)
-            // Netherite: If collected, they only spawn when biomesUnlocked is a multiple of 5 (every 5 biomes)
-            const diamondAvailable = !diamondCollected || (diamondCollected && biomesUnlocked >= 3 && biomesUnlocked % 3 === 0);
-            const netheriteAvailable = !netheriteCollected || (netheriteCollected && biomesUnlocked >= 5 && biomesUnlocked % 5 === 0);
-            
-            // Increase rare block spawn rates by 0.10% for each biome unlocked
-            // biomesUnlocked represents how many different biomes the player has entered
-            const rareBonus = biomesUnlocked * 0.001; // 0.10% per biome unlocked for gold blocks
-            const epicBonus = biomesUnlocked * 0.001; // 0.10% per biome unlocked for emerald blocks
-            const legendaryBonus = biomesUnlocked * 0.001; // 0.10% per biome unlocked for netherite blocks
-            
-            // Adjust base rates - diamond and netherite only spawn if available
-            const baseCommon = 0.6 - (rareBonus + epicBonus + (netheriteAvailable ? legendaryBonus : 0)); // Reduce common to make room for rare blocks
-            const baseUncommon = 0.25; // Keep uncommon steady
-            const baseRare = 0.10 + rareBonus; // Gold blocks (rare) - increases by 0.10% per biome unlocked
-            const baseEmerald = 0.015 + epicBonus; // Emerald blocks (very-rare/epic) - 1.50% base + increases by 0.10% per biome unlocked
-            const baseDiamond = diamondAvailable ? 0.0075 : 0; // Diamond blocks only if available
-            const baseNetherite = netheriteAvailable ? (0.005 + legendaryBonus) : 0; // Netherite blocks only if available
             
             if (rand < baseCommon) {
-                // Common blocks
                 return blockTypes.filter(b => b.rarity === 'common')[Math.floor(Math.random() * 3)];
             } else if (rand < baseCommon + baseUncommon) {
-                // 25% uncommon blocks
                 return blockTypes.filter(b => b.rarity === 'uncommon')[Math.floor(Math.random() * 2)];
             } else if (rand < baseCommon + baseUncommon + baseRare) {
-                // Gold blocks (rare) - increases by 0.10% per biome unlocked
                 return blockTypes.filter(b => b.rarity === 'rare')[0];
             } else if (rand < baseCommon + baseUncommon + baseRare + baseEmerald) {
-                // Emerald blocks (very-rare/epic) - increases by 0.10% per biome unlocked
                 return blockTypes.filter(b => b.name === 'emerald')[0];
-            } else if (diamondAvailable && rand < baseCommon + baseUncommon + baseRare + baseEmerald + baseDiamond) {
-                // Diamond blocks (very-rare/epic) - only if available
+            } else if (rand < baseCommon + baseUncommon + baseRare + baseEmerald + baseDiamond) {
                 return blockTypes.filter(b => b.name === 'diamond')[0];
-            } else if (netheriteAvailable && rand < baseCommon + baseUncommon + baseRare + baseEmerald + baseDiamond + baseNetherite) {
-                // Netherite blocks (legendary) - only if available
+            } else if (rand < baseCommon + baseUncommon + baseRare + baseEmerald + baseDiamond + baseNetherite) {
                 return blockTypes.filter(b => b.name === 'netherite')[0];
+            } else if (rand < baseCommon + baseUncommon + baseRare + baseEmerald + baseDiamond + baseNetherite + ultraRareRate) {
+                const ultraRareBlocks = blockTypes.filter(b => b.rarity === 'ultra-rare');
+                return ultraRareBlocks[Math.floor(Math.random() * ultraRareBlocks.length)];
+            } else if (rand < baseCommon + baseUncommon + baseRare + baseEmerald + baseDiamond + baseNetherite + ultraRareRate + bombRate) {
+                // Bomb blocks (decreasing chance with progression)
+                return blockTypes.filter(b => b.rarity === 'bomb')[0];
             } else {
-                // Fallback to common blocks if rare blocks aren't available
                 return blockTypes.filter(b => b.rarity === 'common')[Math.floor(Math.random() * 3)];
             }
         }
@@ -1194,34 +1188,33 @@
             
             // Square blocks like Minecraft
             const size = Math.random() * 30 + 40; // 40-70px
-            block.style.width = size + 'px';
-            block.style.height = size + 'px';
             
-            // Side-focused positioning (left or right side)
-            // Calculate safe zones on left and right sides
-            const sideWidth = window.innerWidth * 0.25; // Each side is 25% of screen width
-            const safeMarginTop = window.innerHeight * 0.15; // Avoid top UI area
-            const safeMarginBottom = window.innerHeight * 0.15; // Avoid bottom UI area
+            // Make blocks larger on mobile for better touch targets
+            const isMobile = window.innerWidth <= 768;
+            const adjustedSize = isMobile ? Math.max(size, 50) : size;
             
-            const safeHeight = window.innerHeight - safeMarginTop - safeMarginBottom - size;
+            block.style.width = adjustedSize + 'px';
+            block.style.height = adjustedSize + 'px';
             
-            // Randomly choose left or right side
-            const isLeftSide = Math.random() < 0.5;
+            // Center-based positioning
+            const centerWidth = window.innerWidth * 0.6;
+            const centerStart = window.innerWidth * 0.2;
+            const safeMarginTop = gameActive ? 60 : window.innerHeight * 0.15;
+            const safeMarginBottom = window.innerHeight * 0.15;
             
-            if (isLeftSide) {
-                // Left side positioning
-                block.style.left = (Math.random() * (sideWidth - size)) + 'px';
-            } else {
-                // Right side positioning
-                const rightSideStart = window.innerWidth - sideWidth;
-                block.style.left = (rightSideStart + Math.random() * (sideWidth - size)) + 'px';
-            }
+            // Adjust safe margins for mobile
+            const adjustedSafeMarginTop = isMobile && gameActive ? 100 : safeMarginTop;
+            const adjustedSafeMarginBottom = isMobile ? window.innerHeight * 0.1 : safeMarginBottom;
             
-            block.style.top = (safeMarginTop + Math.random() * safeHeight) + 'px';
+            const safeHeight = window.innerHeight - adjustedSafeMarginTop - adjustedSafeMarginBottom - adjustedSize;
+            const safeWidth = centerWidth - adjustedSize;
+            
+            block.style.left = (centerStart + Math.random() * safeWidth) + 'px';
+            block.style.top = (adjustedSafeMarginTop + Math.random() * safeHeight) + 'px';
             
             // Minecraft block styling
             block.style.background = blockType.color;
-            block.style.borderRadius = '0px'; // Square blocks
+            block.style.borderRadius = '0px';
             
             // Add texture pattern
             block.style.backgroundImage = `
@@ -1232,18 +1225,45 @@
             `;
             block.style.backgroundSize = '8px 8px';
             
-            // Add click event with proper event handling
-            block.addEventListener('click', function(e) {
+            // Add click and touch event handlers
+            const handleMineBlock = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                // Check if mining is disabled during confetti effect
                 if (miningDisabled) {
-                    return; // Block mining during confetti effect
+                    return;
                 }
                 mineBlock(block, blockType);
-            });
+            };
             
-            // Add data attribute for debugging
+            // Mouse events
+            block.addEventListener('click', handleMineBlock);
+            
+            // Touch events for mobile support
+            block.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Add visual feedback for touch
+                block.classList.add('touch-feedback');
+            }, { passive: false });
+            
+            block.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Remove visual feedback
+                block.classList.remove('touch-feedback');
+                // Mine the block if mining is not disabled
+                if (!miningDisabled) {
+                    mineBlock(block, blockType);
+                }
+            }, { passive: false });
+            
+            block.addEventListener('touchcancel', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                // Remove visual feedback if touch is cancelled
+                block.classList.remove('touch-feedback');
+            }, { passive: false });
+            
             block.setAttribute('data-block-type', blockType.name);
             
             gameArea.appendChild(block);
@@ -1265,19 +1285,48 @@
             }
         }
 
+        function removeBombBlocks() {
+            // Find all bomb blocks in the game area and remove them
+            const bombBlocks = gameArea.querySelectorAll('[data-block-type="bomb"]');
+            bombBlocks.forEach(bombBlock => {
+                // Add a quick fade-out animation before removing
+                bombBlock.style.transition = 'opacity 0.3s ease-out';
+                bombBlock.style.opacity = '0';
+                
+                // Remove from active blocks array
+                removeBlockFromActive(bombBlock);
+                
+                // Remove from DOM after animation
+                setTimeout(() => {
+                    if (bombBlock.parentNode) {
+                        bombBlock.remove();
+                    }
+                }, 300);
+            });
+        }
+
         function mineBlock(block, blockType) {
             // Prevent multiple clicks
             if (block.classList.contains('pop-animation') || block.classList.contains('big-pop-animation')) return;
             
+            // Play block break sound effect
+            if (blockBreakSound) {
+                blockBreakSound.currentTime = 0; // Reset to start for rapid clicks
+                blockBreakSound.volume = 0.7; // Set volume to 70%
+                blockBreakSound.play().catch(e => {
+                    console.log('Could not play block break sound:', e);
+                });
+            }
+            
+            // Add haptic feedback for mobile devices
+            addHapticFeedback();
+            
             // Remove from active blocks array
             removeBlockFromActive(block);
             
-            // Track collection of diamond and netherite blocks for progressive unlock
-            if (blockType.name === 'diamond' && !diamondCollected) {
-                diamondCollected = true;
-            }
-            if (blockType.name === 'netherite' && !netheriteCollected) {
-                netheriteCollected = true;
+            // If this is NOT a bomb block, remove all bomb blocks from the game area
+            if (blockType.rarity !== 'bomb') {
+                removeBombBlocks();
             }
             
             // Add bonus points for rare blocks
@@ -1285,53 +1334,50 @@
             if (blockType.rarity === 'uncommon') bonus = 2;
             if (blockType.rarity === 'rare') bonus = 5;
             if (blockType.rarity === 'very-rare') {
-                // Emerald blocks are worth 8 points, diamond blocks are worth 10 points
                 bonus = (blockType.name === 'emerald') ? 8 : 10;
             }
-            if (blockType.rarity === 'legendary') bonus = 20; // Netherite blocks
-            if (blockType.rarity === 'blood') bonus = 1000; // Blood blocks worth 1000 points
+            if (blockType.rarity === 'legendary') bonus = 20;
+            if (blockType.rarity === 'ultra-rare') bonus = 50;
+            if (blockType.rarity === 'bomb') bonus = -10; // Bomb blocks decrease points by 10
             
-            // Use big animation for high-value blocks
+            // Use big animation for high-value blocks, normal for bomb blocks
             if (bonus >= 10) {
                 block.classList.add('big-pop-animation');
                 createSparkleEffect(block);
                 createShockwave(block);
-                // Use red confetti for blood blocks, rainbow for others
-                if (blockType.name === 'blood') {
-                    createRedConfetti();
-                } else {
-                    createRainbowConfetti(blockType.name); // Pass block type for different confetti effects
+                
+                // Add fireworks effect for blocks worth more than 49 points
+                if (bonus > 49) {
+                    createFireworksEffect(block);
                 }
+                
+                createRainbowConfetti(blockType.name);
+            } else if (blockType.rarity === 'bomb') {
+                // Special handling for bomb blocks - use normal animation but crying confetti
+                block.classList.add('pop-animation');
+                createCryingConfetti(); // Use crying emoji confetti for bomb blocks
             } else {
                 block.classList.add('pop-animation');
             }
             
-            // In blood level, don't update block count - show ERROR 666 instead
-            if (inBloodLevel) {
-                counter.textContent = 'ERROR 666';
-                // Show special blood block bonus text
-                showBonus(block, 'BLOOD +' + bonus);
+            // Handle bomb blocks reducing the count
+            if (blockType.rarity === 'bomb') {
+                blockCount = Math.max(0, blockCount - 10); // Decrease by 10, minimum 0
+                updateCounterDisplay(blockCount);
+                showBonus(block, 'BOMB ' + bonus); // Show negative bonus
             } else {
                 blockCount++;
-                counter.textContent = blockCount;
-                
-                // Check for secret blood level at exactly 666 blocks
-                if (blockCount === 666 && !bloodLevelTriggered) {
-                    triggerBloodLevel();
-                }
-                
-                // Check for background level change
-                updateBackground();
+                updateCounterDisplay(blockCount);
                 
                 if (bonus > 1) {
                     blockCount += bonus - 1;
-                    counter.textContent = blockCount;
-                    // Update background again in case bonus points pushed us to next level
-                    updateBackground();
-                    // Show bonus text
+                    updateCounterDisplay(blockCount);
                     showBonus(block, blockType.name.toUpperCase() + ' +' + bonus);
                 }
             }
+            
+            // Check for progression after updating the score
+            checkProgression();
             
             // Celebration effect for milestones
             if (blockCount % 25 === 0) {
@@ -1348,11 +1394,9 @@
         }
 
         function createSparkleEffect(block) {
-            const blockRect = block.getBoundingClientRect();
             const centerX = parseInt(block.style.left) + parseInt(block.style.width) / 2;
             const centerY = parseInt(block.style.top) + parseInt(block.style.height) / 2;
             
-            // Create multiple sparkles
             for (let i = 0; i < 8; i++) {
                 const sparkle = document.createElement('div');
                 sparkle.className = 'sparkle-effect';
@@ -1387,7 +1431,6 @@
             shockwave.style.zIndex = '1500';
             shockwave.style.animation = 'shockwave 0.6s ease-out forwards';
             
-            // Add shockwave animation
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes shockwave {
@@ -1405,91 +1448,147 @@
             }, 600);
         }
 
+        function createFireworksEffect(block) {
+            const centerX = parseInt(block.style.left) + parseInt(block.style.width) / 2;
+            const centerY = parseInt(block.style.top) + parseInt(block.style.height) / 2;
+            
+            const fireworkColors = [
+                '#FF0040', '#FF4000', '#FFFF00', '#40FF00', '#0040FF', 
+                '#8000FF', '#FF0080', '#FF8000', '#00FF80', '#0080FF',
+                '#FFD700', '#FF1493', '#00CED1', '#32CD32', '#FF6347'
+            ];
+            
+            for (let explosion = 0; explosion < 5; explosion++) {
+                setTimeout(() => {
+                    const explosionX = centerX + (Math.random() - 0.5) * 200;
+                    const explosionY = centerY + (Math.random() - 0.5) * 200;
+                    
+                    for (let particle = 0; particle < 15; particle++) {
+                        const firework = document.createElement('div');
+                        firework.className = 'firework-particle';
+                        
+                        const color = fireworkColors[Math.floor(Math.random() * fireworkColors.length)];
+                        firework.style.background = color;
+                        firework.style.boxShadow = `0 0 20px ${color}`;
+                        
+                        const size = Math.random() * 8 + 4;
+                        firework.style.width = size + 'px';
+                        firework.style.height = size + 'px';
+                        firework.style.position = 'absolute';
+                        firework.style.borderRadius = '50%';
+                        firework.style.zIndex = '9999';
+                        firework.style.pointerEvents = 'none';
+                        
+                        firework.style.left = explosionX + 'px';
+                        firework.style.top = explosionY + 'px';
+                        
+                        const angle = (particle / 15) * Math.PI * 2;
+                        const distance = Math.random() * 150 + 50;
+                        const xDistance = Math.cos(angle) * distance;
+                        const yDistance = Math.sin(angle) * distance;
+                        
+                        firework.style.setProperty('--x-distance', xDistance + 'px');
+                        firework.style.setProperty('--y-distance', yDistance + 'px');
+                        
+                        firework.style.animation = `fireworkExplode 1.5s ease-out forwards`;
+                        firework.style.animationDelay = (Math.random() * 0.2) + 's';
+                        
+                        gameArea.appendChild(firework);
+                        
+                        setTimeout(() => {
+                            if (firework.parentNode) firework.remove();
+                        }, 2000);
+                    }
+                }, explosion * 200);
+            }
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fireworkExplode {
+                    0% { 
+                        transform: translate(0, 0) scale(1);
+                        opacity: 1;
+                    }
+                    50% { 
+                        transform: translate(calc(var(--x-distance) * 0.5), calc(var(--y-distance) * 0.5)) scale(1.2);
+                        opacity: 1;
+                    }
+                    100% { 
+                        transform: translate(var(--x-distance), var(--y-distance)) scale(0.3);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            setTimeout(() => {
+                style.remove();
+            }, 3000);
+        }
+
         function createRainbowConfetti(blockType) {
-            // Disable mining during the confetti effect
             miningDisabled = true;
             
             const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3', '#FF69B4', '#00FFFF', '#FFA500'];
             
-            // Reduced particle counts and optimized settings for better performance
             let confettiCount, animationDuration, totalEffectDuration;
             if (blockType === 'diamond') {
-                confettiCount = 300; // Reduced from 1000
-                animationDuration = 3000; // Reduced from 5000ms
-                totalEffectDuration = 5000; // 2s burst delay + 3s animation
+                confettiCount = 300;
+                animationDuration = 3000;
+                totalEffectDuration = 5000;
             } else if (blockType === 'netherite') {
-                confettiCount = 500; // Reduced from 2500
-                animationDuration = 4000; // Reduced from 10000ms
-                totalEffectDuration = 6000; // 2s burst delay + 4s animation
+                confettiCount = 500;
+                animationDuration = 4000;
+                totalEffectDuration = 6000;
             } else {
-                // Fallback for other blocks (shouldn't happen but just in case)
-                confettiCount = 150; // Reduced from 500
+                confettiCount = 150;
                 animationDuration = 3000;
                 totalEffectDuration = 5000;
             }
             
-            // Reduced burst count for better performance
-            const burstCount = 3; // Reduced from 5
-            
-            // Pre-create a fragment to batch DOM operations
-            const fragment = document.createDocumentFragment();
+            const burstCount = 3;
             
             for (let burst = 0; burst < burstCount; burst++) {
                 setTimeout(() => {
-                    // Random position for each firework burst - spread across entire screen
-                    const burstX = Math.random() * (window.innerWidth * 0.9) + (window.innerWidth * 0.05); // 5-95% of screen width
-                    const burstY = Math.random() * (window.innerHeight * 0.7) + (window.innerHeight * 0.15); // 15-85% of screen height
+                    const burstX = Math.random() * (window.innerWidth * 0.9) + (window.innerWidth * 0.05);
+                    const burstY = Math.random() * (window.innerHeight * 0.7) + (window.innerHeight * 0.15);
                     
-                    // Create particles for this burst
                     const particlesPerBurst = Math.floor(confettiCount / burstCount);
                     const batchFragment = document.createDocumentFragment();
                     
-                    // Create all particles for this burst at once to reduce DOM manipulation
                     for (let i = 0; i < particlesPerBurst; i++) {
-                        // Create main firework particle
                         const confetti = document.createElement('div');
                         confetti.className = 'confetti';
                         
-                        // Random color from rainbow palette
                         const randomColor = colors[Math.floor(Math.random() * colors.length)];
                         confetti.style.background = randomColor;
-                        confetti.style.color = randomColor; // For box-shadow glow
-                        
-                        // Simplified shapes - only circles for better performance
                         confetti.style.borderRadius = '50%';
                         
-                        // Variable sizes for more realistic firework
-                        const size = Math.random() * 6 + 4; // Reduced size range: 4-10px (was 6-14px)
+                        const size = Math.random() * 6 + 4;
                         confetti.style.width = size + 'px';
                         confetti.style.height = size + 'px';
+                        confetti.style.position = 'absolute';
+                        confetti.style.zIndex = '9999';
+                        confetti.style.pointerEvents = 'none';
                         
-                        // Start at burst center
                         confetti.style.left = burstX + 'px';
                         confetti.style.top = burstY + 'px';
                         
-                        // Calculate firework explosion pattern
                         const angle = Math.random() * Math.PI * 2;
-                        const distance = Math.random() * 300 + 100; // Reduced spread: 100-400px (was 150-550px)
+                        const distance = Math.random() * 300 + 100;
                         const xDistance = Math.cos(angle) * distance;
-                        const yDistance = Math.sin(angle) * distance + (Math.random() * 80 + 40); // Reduced gravity effect
+                        const yDistance = Math.sin(angle) * distance + (Math.random() * 80 + 40);
                         
-                        // Set CSS custom properties for explosion direction
                         confetti.style.setProperty('--x-distance', xDistance + 'px');
                         confetti.style.setProperty('--y-distance', yDistance + 'px');
-                        
-                        // Reduced animation delay range for faster start
+                        confetti.style.animation = `confettiFall ${animationDuration}ms ease-out forwards`;
                         confetti.style.animationDelay = (Math.random() * 0.1) + 's';
-                        
-                        // Simplified trail - removed for performance
-                        // Only keep main confetti particles to reduce DOM elements by 50%
                         
                         batchFragment.appendChild(confetti);
                     }
                     
-                    // Add all particles at once to minimize reflows
                     gameArea.appendChild(batchFragment);
                     
-                    // Single cleanup timeout per burst instead of per particle
                     setTimeout(() => {
                         const confettiElements = gameArea.querySelectorAll('.confetti');
                         confettiElements.forEach(element => {
@@ -1497,13 +1596,27 @@
                         });
                     }, animationDuration);
                     
-                }, burst * 300); // Reduced stagger time from 500ms to 300ms
+                }, burst * 300);
             }
             
-            // Re-enable mining after the confetti effect completes
-            // Total duration varies by block type
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes confettiFall {
+                    0% { 
+                        transform: translate(0, 0) rotate(0deg);
+                        opacity: 1;
+                    }
+                    100% { 
+                        transform: translate(var(--x-distance), var(--y-distance)) rotate(720deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
             setTimeout(() => {
                 miningDisabled = false;
+                style.remove();
             }, totalEffectDuration);
         }
 
@@ -1529,6 +1642,51 @@
             }, 1000);
         }
 
+        function createCryingConfetti() {
+            // Create crying emoji confetti for bomb blocks
+            const cryingEmojis = ['😭', '😢', '💔', '😿', '😞'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.textContent = cryingEmojis[Math.floor(Math.random() * cryingEmojis.length)];
+                    emoji.style.position = 'fixed';
+                    emoji.style.fontSize = '20px';
+                    emoji.style.left = Math.random() * window.innerWidth + 'px';
+                    emoji.style.top = '-30px';
+                    emoji.style.zIndex = '9999';
+                    emoji.style.pointerEvents = 'none';
+                    emoji.style.animation = 'cryingFall 2s ease-out forwards';
+                    
+                    document.body.appendChild(emoji);
+                    
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 2000);
+                }, i * 50);
+            }
+            
+            // Add crying animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes cryingFall {
+                    0% { 
+                        transform: translateY(0) rotate(0deg);
+                        opacity: 1;
+                    }
+                    100% { 
+                        transform: translateY(100vh) rotate(180deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            setTimeout(() => {
+                style.remove();
+            }, 2000);
+        }
+
         function celebrateScore() {
             counter.style.transform = 'scale(1.5)';
             counter.style.color = '#00FF00';
@@ -1538,72 +1696,503 @@
             }, 500);
         }
 
+        function checkProgression() {
+            // Find the highest biome the player has unlocked
+            let newBiome = biomeProgression[0];
+            let newLevel = 1;
+            
+            for (let i = biomeProgression.length - 1; i >= 0; i--) {
+                if (blockCount >= biomeProgression[i].threshold) {
+                    newBiome = biomeProgression[i];
+                    newLevel = i + 1;
+                    break;
+                }
+            }
+            
+            // Check if we've progressed to a new biome
+            if (newBiome.name !== currentBiome) {
+                const oldBiome = currentBiome;
+                currentBiome = newBiome.name;
+                currentLevel = newLevel;
+                
+                // Update background
+                updateBiomeBackground(newBiome.className);
+                
+                // Show biome unlock notification
+                showBiomeUnlockNotification(newBiome.displayName, oldBiome);
+                
+                // Celebrate level up
+                celebrateLevelUp();
+            }
+        }
+
+        function updateBiomeBackground(newBiomeClass) {
+            // Remove all existing biome classes
+            biomeProgression.forEach(biome => {
+                body.classList.remove(biome.className);
+            });
+            
+            // Add the new biome class
+            body.classList.add(newBiomeClass);
+        }
+
+        function showBiomeUnlockNotification(biomeName, oldBiome) {
+            // Update biome display elements
+            const biomeDisplay = document.getElementById('biomeDisplay');
+            const compactBiomeDisplay = document.getElementById('compactBiomeDisplay');
+            if (biomeDisplay) biomeDisplay.textContent = biomeName;
+            if (compactBiomeDisplay) compactBiomeDisplay.textContent = biomeName;
+            
+            // Update next biome display
+            updateNextBiomeDisplay();
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.innerHTML = `
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-300 mb-2" style="text-shadow: 2px 2px 0 #333;">
+                        🌍 BIOME UNLOCKED! 🌍
+                    </div>
+                    <div class="text-xl text-green-400 font-bold" style="text-shadow: 1px 1px 0 #333;">
+                        ${biomeName}
+                    </div>
+                    <div class="text-sm text-yellow-200 mt-2" style="text-shadow: 1px 1px 0 #333;">
+                        Rare blocks are now more common!
+                    </div>
+                </div>
+            `;
+            
+            notification.style.position = 'fixed';
+            notification.style.top = '50%';
+            notification.style.left = '50%';
+            notification.style.transform = 'translate(-50%, -50%)';
+            notification.style.zIndex = '10000';
+            notification.style.background = 'rgba(0, 0, 0, 0.9)';
+            notification.style.border = '3px solid #FFD700';
+            notification.style.borderRadius = '12px';
+            notification.style.padding = '20px 30px';
+            notification.style.backdropFilter = 'blur(10px)';
+            notification.style.animation = 'biomeUnlock 4s ease-in-out forwards';
+            notification.style.fontFamily = 'Courier New, monospace';
+            
+            // Add animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes biomeUnlock {
+                    0% { 
+                        opacity: 0;
+                        transform: translate(-50%, -50%) scale(0.5);
+                    }
+                    15% { 
+                        opacity: 1;
+                        transform: translate(-50%, -50%) scale(1.1);
+                    }
+                    25% { 
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                    85% { 
+                        opacity: 1;
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                    100% { 
+                        opacity: 0;
+                        transform: translate(-50%, -50%) scale(0.8);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+                style.remove();
+            }, 4000);
+        }
+
+        function updateNextBiomeDisplay() {
+            const nextBiomeDisplay = document.getElementById('nextBiomeDisplay');
+            if (!nextBiomeDisplay) return;
+            
+            // Find the next biome in progression
+            let nextBiome = null;
+            for (let i = 0; i < biomeProgression.length; i++) {
+                if (blockCount < biomeProgression[i].threshold) {
+                    nextBiome = biomeProgression[i];
+                    break;
+                }
+            }
+            
+            if (nextBiome) {
+                const remaining = nextBiome.threshold - blockCount;
+                nextBiomeDisplay.textContent = `${nextBiome.displayName} (${remaining} blocks)`;
+            } else {
+                nextBiomeDisplay.textContent = 'Max Level Reached!';
+            }
+        }
+
+        function celebrateLevelUp() {
+            // Create level up confetti
+            const colors = ['#FFD700', '#00FF00', '#FF4500', '#FF1493', '#00CED1'];
+            
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.style.position = 'fixed';
+                    confetti.style.width = '10px';
+                    confetti.style.height = '10px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0%';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-20px';
+                    confetti.style.zIndex = '9999';
+                    confetti.style.pointerEvents = 'none';
+                    confetti.style.animation = 'levelUpConfetti 3s ease-out forwards';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 20);
+            }
+            
+            // Add confetti animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes levelUpConfetti {
+                    0% { 
+                        transform: translateY(0) rotate(0deg);
+                        opacity: 1;
+                    }
+                    100% { 
+                        transform: translateY(100vh) rotate(720deg);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            setTimeout(() => {
+                style.remove();
+            }, 3000);
+        }
+
+        function updateCounterDisplay(count) {
+            if (counter) counter.textContent = count;
+            if (compactCounter) compactCounter.textContent = count;
+            
+            // Update next biome display whenever score changes
+            updateNextBiomeDisplay();
+        }
+
+        function startDynamicBlockSpawning() {
+            function spawnBlock() {
+                createBlock();
+                
+                // Calculate dynamic spawn rate based on progression
+                // Base rate: 300ms, gets faster with progression (min 150ms)
+                let baseRate = 300;
+                let progressionBonus = Math.min(currentLevel * 5, 150); // Faster spawning as you progress
+                let spawnRate = Math.max(baseRate - progressionBonus, 150);
+                
+                // Special biome modifiers
+                if (currentBiome.includes('nether') || currentBiome.includes('end')) {
+                    spawnRate *= 0.8; // 20% faster in dangerous biomes
+                }
+                
+                if (gameActive) {
+                    blockInterval = setTimeout(spawnBlock, spawnRate);
+                }
+            }
+            
+            spawnBlock(); // Start the spawning cycle
+        }
+
         function startGame() {
             gameActive = true;
+            miningDisabled = false; // Reset mining disabled flag
             startBtn.textContent = '⛏️ MINING ACTIVE!';
             startBtn.disabled = true;
             startBtn.classList.add('opacity-50');
             
-            // Add game cursor
+            // Start background music if enabled
+            if (backgroundMusic && musicEnabled) {
+                backgroundMusic.volume = 1.0; // Set volume to 100%
+                backgroundMusic.play().catch(e => {
+                    console.log('Could not play background music:', e);
+                });
+            }
+            
+            // Hide touch hint when game starts
+            const touchHint = document.getElementById('touchHint');
+            if (touchHint) {
+                touchHint.style.display = 'none';
+            }
+            
+            // Add game cursor and game-active class
             document.body.classList.add('game-active-cursor');
+            document.body.classList.add('game-active');
+            
+            // Style navigation for gameplay
+            nav.classList.add('nav-gameplay-mode');
+            
+            // Switch to compact UI layout
+            const heroSection = document.getElementById('heroSection');
+            heroSection.classList.remove('game-ui-normal');
+            heroSection.classList.add('game-ui-compact');
+            heroSection.classList.add('animate-entrance');
+            
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                heroSection.classList.remove('animate-entrance');
+            }, 600);
             
             // Create blocks more frequently since we limit to 5 at a time
-            blockInterval = setInterval(createBlock, 300);
+            // Start dynamic block spawning based on progression
+            startDynamicBlockSpawning();
+        }
+
+        function stopGame() {
+            gameActive = false;
+            miningDisabled = false; // Reset mining disabled flag
+            clearTimeout(blockInterval);
+            
+            // Pause background music
+            if (backgroundMusic) {
+                backgroundMusic.pause();
+            }
+            
+            // Show touch hint again when game stops on mobile
+            const touchHint = document.getElementById('touchHint');
+            if (touchHint) {
+                touchHint.style.display = 'block';
+            }
+            
+            // Remove game cursor and game-active class
+            document.body.classList.remove('game-active-cursor');
+            document.body.classList.remove('game-active');
+            
+            // Reset navigation styling
+            nav.classList.remove('nav-gameplay-mode');
+            
+            // Switch back to normal UI layout
+            const heroSection = document.getElementById('heroSection');
+            heroSection.classList.remove('game-ui-compact');
+            heroSection.classList.add('game-ui-normal');
+            
+            // Reset start button to allow mining again
+            startBtn.textContent = '⛏️ START MINING!';
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+            
+            // Remove all active blocks but keep the count
+            const blocks = document.querySelectorAll('.bubble');
+            blocks.forEach(block => block.remove());
+            activeBlocks = []; // Reset active blocks array
         }
 
         function resetGame() {
             gameActive = false;
-            clearInterval(blockInterval);
+            miningDisabled = false; // Reset mining disabled flag
+            clearTimeout(blockInterval);
             blockCount = 0;
-            currentBgLevel = 0;
-            biomesUnlocked = 0; // Reset biomes unlocked counter
-            diamondCollected = false; // Reset diamond collection status
-            netheriteCollected = false; // Reset netherite collection status
-            guaranteedDiamondSpawned = false; // Reset guaranteed diamond spawn flag
-            guaranteedNetheriteSpawned = false; // Reset guaranteed netherite spawn flag
-            inBloodLevel = false; // Reset blood level state
-            bloodLevelTriggered = false; // Reset blood level trigger
-            counter.textContent = '0';
+            currentLevel = 1;
+            currentBiome = 'overworld';
+            updateCounterDisplay('0');
             activeBlocks = []; // Reset active blocks array
             
-            // Remove game cursor
-            document.body.classList.remove('game-active-cursor');
+            // Reset background to overworld
+            updateBiomeBackground('bg-overworld');
             
-            // Reset background to first theme
-            const allBgClasses = [
-                'bg-overworld', 'bg-plains', 'bg-ice-plains', 'bg-ice-spikes', 'bg-sunflower-plains', 
-                'bg-snowy-plains', 'bg-mushroom-field', 'bg-savanna', 'bg-forest', 'bg-birch-forest',
-                'bg-dark-forest', 'bg-flower-forest', 'bg-old-birch', 'bg-taiga', 'bg-old-spruce',
-                'bg-old-pine', 'bg-snowy-taiga', 'bg-jungle', 'bg-bamboo-jungle', 'bg-sparse-jungle',
-                'bg-grove', 'bg-cherry-grove', 'bg-pale-garden', 'bg-cave', 'bg-deep-dark',
-                'bg-dripstone-caves', 'bg-lush-caves', 'bg-jagged-peaks', 'bg-frozen-peaks',
-                'bg-stony-peaks', 'bg-snowy-slopes', 'bg-windswept-hills', 'bg-windswept-forest',
-                'bg-windswept-gravelly', 'bg-meadow', 'bg-stony-shores', 'bg-savanna-plateau',
-                'bg-windswept-savanna', 'bg-swamp', 'bg-mangrove-swamp', 'bg-badlands',
-                'bg-wooded-badlands', 'bg-eroded-badlands', 'bg-beach', 'bg-snowy-beach',
-                'bg-desert', 'bg-river', 'bg-frozen-river', 'bg-ocean', 'bg-cold-ocean',
-                'bg-deep-ocean', 'bg-frozen-ocean', 'bg-lukewarm-ocean', 'bg-warm-ocean',
-                'bg-nether-wastes', 'bg-soul-sand-valley', 'bg-basalt-deltas', 'bg-crimson-forest',
-                'bg-warped-forest', 'bg-nether', 'bg-mesa', 'bg-end', 'bg-end-barrens',
-                'bg-end-highlands', 'bg-end-midlands', 'bg-small-end-islands', 'bg-real-end', 'bg-blood-level'
-            ];
-            body.classList.remove(...allBgClasses);
-            body.classList.add('bg-plains');
-            levelDisplay.textContent = 'LEVEL: PLAINS';
+            // Reset biome display
+            const biomeDisplay = document.getElementById('biomeDisplay');
+            const compactBiomeDisplay = document.getElementById('compactBiomeDisplay');
+            if (biomeDisplay) biomeDisplay.textContent = 'Overworld';
+            if (compactBiomeDisplay) compactBiomeDisplay.textContent = 'Overworld';
+            
+            // Reset next biome display
+            updateNextBiomeDisplay();
+            
+            // Stop and reset background music
+            if (backgroundMusic) {
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0;
+            }
+            
+            // Show touch hint again when game resets on mobile
+            const touchHint = document.getElementById('touchHint');
+            if (touchHint) {
+                touchHint.style.display = 'block';
+            }
+            
+            // Remove game cursor and game-active class
+            document.body.classList.remove('game-active-cursor');
+            document.body.classList.remove('game-active');
+            
+            // Reset navigation styling
+            nav.classList.remove('nav-gameplay-mode');
+            
+            // Switch back to normal UI layout
+            const heroSection = document.getElementById('heroSection');
+            heroSection.classList.remove('game-ui-compact');
+            heroSection.classList.add('game-ui-normal');
             
             // Remove all blocks
             const blocks = document.querySelectorAll('.bubble');
             blocks.forEach(block => block.remove());
             
-            // Reset start button
+            // Reset start button to allow mining again
             startBtn.textContent = '⛏️ START MINING!';
             startBtn.disabled = false;
             startBtn.classList.remove('opacity-50');
+            
         }
 
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            
+            if (musicEnabled) {
+                musicToggleBtn.textContent = '🎵 MUSIC: ON';
+                compactMusicToggleBtn.textContent = '🎵';
+                compactMusicToggleBtn.style.backgroundColor = '#7C3AED'; // Purple
+                if (gameActive && backgroundMusic) {
+                    backgroundMusic.play().catch(e => {
+                        console.log('Could not play background music:', e);
+                    });
+                }
+            } else {
+                musicToggleBtn.textContent = '🔇 MUSIC: OFF';
+                compactMusicToggleBtn.textContent = '🔇';
+                compactMusicToggleBtn.style.backgroundColor = '#6B7280'; // Gray
+                if (backgroundMusic) {
+                    backgroundMusic.pause();
+                }
+            }
+        }
+
+        // Helper function to update both counters
+        function updateCounterDisplay(value) {
+            counter.textContent = value;
+            compactCounter.textContent = value;
+        }
+        
         // Event listeners
         startBtn.addEventListener('click', startGame);
+        stopBtn.addEventListener('click', stopGame);
         resetBtn.addEventListener('click', resetGame);
+        compactStopBtn.addEventListener('click', stopGame);
+        compactResetBtn.addEventListener('click', resetGame);
+        musicToggleBtn.addEventListener('click', toggleMusic);
+        compactMusicToggleBtn.addEventListener('click', toggleMusic);
+        musicToggleBtn.addEventListener('click', toggleMusic);
+        compactMusicToggleBtn.addEventListener('click', toggleMusic);
+
+        // Touch event listeners for buttons to improve mobile experience
+        [startBtn, stopBtn, resetBtn, compactStopBtn, compactResetBtn, musicToggleBtn, compactMusicToggleBtn].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('touchstart', function(e) {
+                    this.style.transform = 'scale(0.95)';
+                }, { passive: true });
+                
+                btn.addEventListener('touchend', function(e) {
+                    this.style.transform = '';
+                }, { passive: true });
+                
+                btn.addEventListener('touchcancel', function(e) {
+                    this.style.transform = '';
+                }, { passive: true });
+            }
+        });
+
+        // Prevent default touch behaviors on game area during gameplay
+        gameArea.addEventListener('touchstart', function(e) {
+            if (gameActive) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        gameArea.addEventListener('touchmove', function(e) {
+            if (gameActive) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        gameArea.addEventListener('touchend', function(e) {
+            if (gameActive) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Prevent zoom on double tap for the entire document during gameplay
+        document.addEventListener('touchstart', function(e) {
+            if (gameActive && e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Prevent context menu on long press during gameplay
+        document.addEventListener('contextmenu', function(e) {
+            if (gameActive) {
+                e.preventDefault();
+            }
+        });
+
+        // Handle window resize for responsive gameplay
+        window.addEventListener('resize', function() {
+            // Adjust game area if needed when orientation changes
+            if (gameActive) {
+                // Remove blocks that might be outside the new viewport
+                const blocks = document.querySelectorAll('.bubble');
+                blocks.forEach(block => {
+                    const rect = block.getBoundingClientRect();
+                    if (rect.right > window.innerWidth || rect.bottom > window.innerHeight || rect.left < 0 || rect.top < 0) {
+                        removeBlockFromActive(block);
+                        block.remove();
+                    }
+                });
+            }
+        });
+
+        // Handle orientation change specifically for mobile devices
+        window.addEventListener('orientationchange', function() {
+            // Wait for the orientation change to complete
+            setTimeout(function() {
+                if (gameActive) {
+                    // Force a layout recalculation and remove out-of-bounds blocks
+                    const blocks = document.querySelectorAll('.bubble');
+                    blocks.forEach(block => {
+                        const rect = block.getBoundingClientRect();
+                        if (rect.right > window.innerWidth || rect.bottom > window.innerHeight || rect.left < 0 || rect.top < 0) {
+                            removeBlockFromActive(block);
+                            block.remove();
+                        }
+                    });
+                }
+            }, 500);
+        });
+
+        // Add haptic feedback for supported devices
+        function addHapticFeedback() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50); // Short vibration for block mining
+            }
+        }
+
+        // Show mobile optimization notice
+        function showMobileOptimizationNotice() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            if (isMobile || isTouchDevice) {
+                console.log('Mobile device detected - touch controls enabled');
+                // Add mobile-specific class to body for additional styling if needed
+                document.body.classList.add('mobile-device');
+            }
+        }
+
+        // Initialize mobile optimizations
+        showMobileOptimizationNotice();
 
         // Blood level trigger shortcut: Ctrl + Shift + B
         document.addEventListener('keydown', function(e) {
@@ -1617,48 +2206,33 @@
             }
         });
 
-        // Create some initial blocks for visual appeal
-        setTimeout(() => {
-            for (let i = 0; i < 3; i++) {
-                setTimeout(() => {
-                    const blockType = getRandomBlock();
-                    const block = document.createElement('div');
-                    block.className = 'bubble';
-                    
-                    const size = Math.random() * 25 + 35;
-                    block.style.width = size + 'px';
-                    block.style.height = size + 'px';
-                    block.style.left = Math.random() * (window.innerWidth - size) + 'px';
-                    block.style.top = Math.random() * (window.innerHeight - size) + 'px';
-                    
-                    block.style.background = blockType.color;
-                    block.style.borderRadius = '0px';
-                    block.style.backgroundImage = `
-                        linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
-                        linear-gradient(-45deg, rgba(255,255,255,0.1) 25%, transparent 25%),
-                        linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.1) 75%),
-                        linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.1) 75%)
-                    `;
-                    block.style.backgroundSize = '8px 8px';
-                    block.style.animationDuration = (Math.random() * 3 + 3) + 's';
-                    
-                    // Add click event to demo blocks too
-                    block.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (!gameActive) {
-                            // Show message to start game
-                            alert('Click "START MINING!" to begin the game!');
-                        }
-                    });
-                    
-                    gameArea.appendChild(block);
-                }, i * 800);
-            }
-        }, 1000);
-
         // Initialize with first background theme
         body.classList.add('bg-plains');
+
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+
+            // Close mobile menu when clicking on a link
+            const mobileLinks = mobileMenu.querySelectorAll('a');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        }
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1671,6 +2245,230 @@
                     });
                 }
             });
+        });
+
+        function createBloodJumpscare() {
+            // Create jumpscare overlay
+            const jumpscare = document.createElement('div');
+            jumpscare.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #000000;
+                z-index: 99999;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                opacity: 0;
+                transition: opacity 0.1s ease-in;
+            `;
+            
+            // Jumpscare content
+            jumpscare.innerHTML = `
+                <div style="
+                    font-size: 120px;
+                    color: #FF0000;
+                    font-family: 'Courier New', monospace;
+                    font-weight: bold;
+                    text-align: center;
+                    text-shadow: 0 0 50px #FF0000;
+                    animation: bloodFlash 0.1s infinite;
+                ">
+                    💀🩸
+                </div>
+                <div style="
+                    font-size: 48px;
+                    color: #FFFFFF;
+                    font-family: 'Courier New', monospace;
+                    font-weight: bold;
+                    text-align: center;
+                    margin-top: 20px;
+                    text-shadow: 3px 3px 0 #000;
+                    animation: screamText 0.2s infinite;
+                ">
+                    BLOOD CONSUMED!
+                </div>
+                <div style="
+                    font-size: 24px;
+                    color: #FF6666;
+                    font-family: 'Courier New', monospace;
+                    text-align: center;
+                    margin-top: 15px;
+                    animation: pulseRed 0.3s infinite;
+                ">
+                    THE REALM FEEDS ON YOUR SOUL...
+                </div>
+            `;
+            
+            // Add jumpscare animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes bloodFlash {
+                    0%, 100% { color: #FF0000; text-shadow: 0 0 50px #FF0000; }
+                    50% { color: #8B0000; text-shadow: 0 0 100px #8B0000; }
+                }
+                
+                @keyframes screamText {
+                    0%, 100% { transform: scale(1) rotate(0deg); }
+                    25% { transform: scale(1.1) rotate(-2deg); }
+                    75% { transform: scale(0.9) rotate(2deg); }
+                }
+                
+                @keyframes pulseRed {
+                    0%, 100% { opacity: 1; transform: scale(1); }
+                    50% { opacity: 0.7; transform: scale(1.05); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(jumpscare);
+            
+            // Flash effect - instantly visible
+            setTimeout(() => {
+                jumpscare.style.opacity = '1';
+            }, 50);
+            
+            // Play jumpscare sound effect (if audio is available)
+            try {
+                // Create audio context for jumpscare sound
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Create a scary low-frequency sound
+                oscillator.frequency.setValueAtTime(80, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(40, audioContext.currentTime + 0.3);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                // Audio not available, continue without sound
+                console.log('Audio not available for jumpscare');
+            }
+            
+            // Screen shake effect
+            document.body.style.animation = 'bloodShake 0.5s ease-in-out';
+            const shakeStyle = document.createElement('style');
+            shakeStyle.textContent = `
+                @keyframes bloodShake {
+                    0%, 100% { transform: translate(0, 0); }
+                    10% { transform: translate(-5px, -2px); }
+                    20% { transform: translate(5px, 2px); }
+                    30% { transform: translate(-3px, 1px); }
+                    40% { transform: translate(3px, -1px); }
+                    50% { transform: translate(-2px, 2px); }
+                    60% { transform: translate(2px, -2px); }
+                    70% { transform: translate(-1px, 1px); }
+                    80% { transform: translate(1px, -1px); }
+                    90% { transform: translate(-1px, 0px); }
+                }
+            `;
+            document.head.appendChild(shakeStyle);
+            
+            // Remove jumpscare after 1 second
+            setTimeout(() => {
+                jumpscare.style.opacity = '0';
+                setTimeout(() => {
+                    jumpscare.remove();
+                    style.remove();
+                    shakeStyle.remove();
+                    document.body.style.animation = '';
+                }, 200);
+            }, 1000);
+        }
+
+        function disableBloodLevelButtons() {
+            // Disable and corrupt all stop/reset buttons during blood level
+            const buttons = [stopBtn, resetBtn, compactStopBtn, compactResetBtn];
+            
+            buttons.forEach(button => {
+                if (button) {
+                    // Save original text if not already saved
+                    if (!button.dataset.originalText) {
+                        button.dataset.originalText = button.textContent;
+                    }
+                    
+                    // Change text to ERROR and disable
+                    button.textContent = '❌ ERROR';
+                    button.disabled = true;
+                    button.style.opacity = '0.5';
+                    button.style.cursor = 'not-allowed';
+                    button.style.backgroundColor = '#8B0000'; // Dark red background
+                    button.style.color = '#FF0000'; // Red text
+                    button.style.border = '2px solid #FF0000';
+                    
+                    // Add error hover effect
+                    button.onmouseover = function() {
+                        this.style.backgroundColor = '#FF0000';
+                        this.style.color = '#FFFFFF';
+                    };
+                    button.onmouseout = function() {
+                        this.style.backgroundColor = '#8B0000';
+                        this.style.color = '#FF0000';
+                    };
+                }
+            });
+        }
+
+        function enableBloodLevelButtons() {
+            // Restore buttons when leaving blood level (for reset functionality)
+            const buttons = [stopBtn, resetBtn, compactStopBtn, compactResetBtn];
+            
+            buttons.forEach(button => {
+                if (button && button.dataset.originalText) {
+                    // Restore original text and functionality
+                    button.textContent = button.dataset.originalText;
+                    button.disabled = false;
+                    button.style.opacity = '1';
+                    button.style.cursor = 'pointer';
+                    button.style.backgroundColor = ''; // Reset to original
+                    button.style.color = ''; // Reset to original
+                    button.style.border = ''; // Reset to original
+                    
+                    // Remove error hover effects
+                    button.onmouseover = null;
+                    button.onmouseout = null;
+                    
+                    // Clear saved original text
+                    delete button.dataset.originalText;
+                }
+            });
+        }
+
+        // ...existing code...
+        
+        // Event listeners and initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize next biome display
+            updateNextBiomeDisplay();
+            
+            // Game control event listeners
+            startBtn.addEventListener('click', startGame);
+            stopBtn.addEventListener('click', stopGame);
+            resetBtn.addEventListener('click', resetGame);
+            compactStopBtn.addEventListener('click', stopGame);
+            compactResetBtn.addEventListener('click', resetGame);
+            musicToggleBtn.addEventListener('click', toggleMusic);
+            compactMusicToggleBtn.addEventListener('click', toggleMusic);
+            
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
         });
     </script>
 </body>
